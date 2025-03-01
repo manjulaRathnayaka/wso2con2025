@@ -22,7 +22,7 @@ endpoints:
       - Public
       - Organization
     # +optional Path to the OpenAPI schema file.
-    schemaFilePath: ./choreo/openapi.yaml
+    schemaFilePath: .choreo/openapi.yaml
 
 # +optional Outgoing connection details for the component.
 dependencies:
