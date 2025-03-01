@@ -23,7 +23,7 @@ RUN groupadd -g 10005 appgroup && \
 RUN chown -R appuser:appgroup /opt/ollama
 
 # Switch to non-root user
-USER appuser
+USER 10005
 
 # Set up working directory
 WORKDIR /home/appuser/app
