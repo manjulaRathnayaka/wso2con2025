@@ -18,11 +18,11 @@ endpoints:
     type: REST
     # +optional Network level visibilities of the endpoint.
     # Accepted values: Project|Organization|Public(Default).
-    networkVisibilities: 
+    networkVisibilities:
       - Public
       - Organization
     # +optional Path to the OpenAPI schema file.
-    schemaFilePath: openapi.yaml
+    schemaFilePath: ./choreo/openapi.yaml
 
 # +optional Outgoing connection details for the component.
 dependencies:
