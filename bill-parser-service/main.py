@@ -1,14 +1,13 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import re
 import pickle
 import os
 
 app = FastAPI(
-    title="Bill Parser API",
-    description="API that parses bill text to extract structured data",
-    version="1.0.0"
+    title="ML-Enhanced Bill Parser API",
+    description="API that uses ML to parse bill text and extract structured data",
+    version="1.1.0"
 )
 
 # Enable CORS
@@ -20,50 +19,53 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load pre-trained category model and vectorizer
-MODEL_PATH = os.getenv("MODEL_PATH", "models/category_model.pkl")
-VECTORIZER_PATH = os.getenv("VECTORIZER_PATH", "models/vectorizer.pkl")
+# Load all models and vectorizers
+fields = ['merchant', 'amount', 'date', 'category']
+models = {}
+vectorizers = {}
 
-if os.path.exists(MODEL_PATH) and os.path.exists(VECTORIZER_PATH):
-    with open(MODEL_PATH, "rb") as f:
-        category_model = pickle.load(f)
-    with open(VECTORIZER_PATH, "rb") as f:
-        vectorizer = pickle.load(f)
-else:
-    raise Exception("Model files not found. Run `train_model.py` first.")
+for field in fields:
+    model_path = f"models/{field}_model.pkl"
+    vectorizer_path = f"models/{field}_vectorizer.pkl"
 
-# Pydantic model for request validation
+    if os.path.exists(model_path) and os.path.exists(vectorizer_path):
+        with open(model_path, "rb") as f:
+            models[field] = pickle.load(f)
+        with open(vectorizer_path, "rb") as f:
+            vectorizers[field] = pickle.load(f)
+    else:
+        raise Exception(f"Model files for {field} not found. Run train_models.py first.")
+
 class BillRequest(BaseModel):
     text: str
 
-def extract_amount(text):
-    match = re.search(r"(?i)(total|amount due|balance|payable)\s*[:\-\s]?\s*([\$€£]?\d+[.,]?\d*)", text)
-    return match.group(2) if match else None
-
-def extract_date(text):
-    match = re.search(r"\b(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})\b", text)
-    return match.group(1) if match else None
-
-def extract_merchant(text):
-    lines = text.split("\n")
-    return lines[0].strip() if lines else "Unknown Merchant"
-
-def predict_category(merchant, text):
-    input_text = merchant + " " + text
-    vectorized_input = vectorizer.transform([input_text])
-    return category_model.predict(vectorized_input)[0]
+def predict_field(text: str, field: str) -> str:
+    """Generic function to predict any field using corresponding model"""
+    vectorized_input = vectorizers[field].transform([text])
+    return models[field].predict(vectorized_input)[0]
 
 @app.post("/process_bill")
 async def process_bill(request: BillRequest):
-    text = request.text  # Extract text from JSON body
-    merchant = extract_merchant(text)
-    amount = extract_amount(text)
-    date = extract_date(text)
-    category = predict_category(merchant, text)
+    text = request.text
+
+    # Use ML models to predict all fields
+    predictions = {
+        "merchant_name": predict_field(text, "merchant"),
+        "total_amount": predict_field(text, "amount"),
+        "date": predict_field(text, "date"),
+        "category": predict_field(text, "category")
+    }
+
+    # Add confidence scores (optional)
+    confidence_scores = {
+        f"{field}_confidence": float(models[field].predict_proba(
+            vectorizers[field].transform([text])
+        ).max())
+        for field in fields
+    }
 
     return {
-        "merchant_name": merchant,
-        "total_amount": amount,
-        "date": date,
-        "category": category
+        **predictions,
+        **confidence_scores,
+        "raw_text": text
     }

@@ -13,8 +13,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application files
 COPY . .
 
-# Train model and ensure correct permissions
-RUN python train_model.py && \
+# Train models and ensure correct permissions
+RUN python train_models.py && \
     chown -R appuser:appgroup /app
 
 # Switch to non-root user
