@@ -1,0 +1,9 @@
+Walmart Supercenter
+123 Main Street, NY
+Date: 12/02/2025
+Items:
+Milk - $3.99
+Bread - $2.50
+Apples - $5.00
+Total: $11.49
+Thank you for shopping with us!
