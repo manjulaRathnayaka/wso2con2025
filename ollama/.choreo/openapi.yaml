@@ -1,0 +1,70 @@
+openapi: 3.0.3
+info:
+  title: Bill Extraction API
+  description: API that extracts structured billing details (amount, merchant, date, category) from unstructured text using LLMs.
+  version: 1.0.0
+
+servers:
+  - url: https://{environment}/bill-extraction
+    variables:
+      environment:
+        default: "api.choreo.dev"
+        description: Base API URL
+
+paths:
+  /extract:
+    post:
+      summary: Extract structured details from a bill
+      description: Takes raw bill text and extracts details such as total amount, merchant name, transaction date, and inferred category.
+      operationId: extractBillDetails
+      tags:
+        - Bill Extraction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BillRequest"
+      responses:
+        "200":
+          description: Successfully extracted bill details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BillResponse"
+        "400":
+          description: Invalid request format.
+        "500":
+          description: Internal server error.
+
+components:
+  schemas:
+    BillRequest:
+      type: object
+      required:
+        - text
+      properties:
+        text:
+          type: string
+          description: The raw text content of the bill or invoice.
+
+    BillResponse:
+      type: object
+      properties:
+        merchant:
+          type: string
+          description: Name of the merchant from the bill.
+        totalAmount:
+          type: string
+          description: Extracted total billed amount.
+          example: "$57.89"
+        date:
+          type: string
+          format: date
+          description: Extracted transaction date.
+          example: "2025-03-01"
+        category:
+          type: string
+          description: Inferred category of the transaction.
+          example: "Grocery"
+

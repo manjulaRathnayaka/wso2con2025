@@ -1,0 +1,54 @@
+# +required The configuration file schema version
+schemaVersion: 1.1
+
+# +optional Incoming connection details for the component
+endpoints:
+  # +required Unique name for the endpoint.
+  - name: bill-extraction-api
+    # +optional Display name for the endpoint.
+    displayName: Bill Extraction API
+    # +required Service section with API exposure details
+    service:
+      # +optional Base path of the API that gets exposed via the endpoint.
+      basePath: /bill-extraction
+      # +required Numeric port value that gets exposed via the endpoint
+      port: 8080
+    # +required Type of traffic that the endpoint is accepting.
+    # Allowed values: REST, GraphQL, WS, GRPC, TCP, UDP.
+    type: REST
+    # +optional Network level visibilities of the endpoint.
+    # Accepted values: Project|Organization|Public(Default).
+    networkVisibilities: 
+      - Public
+      - Organization
+    # +optional Path to the OpenAPI schema file.
+    schemaFilePath: openapi.yaml
+
+# +optional Outgoing connection details for the component.
+dependencies:
+  # +optional Defines the connection references from the Internal Marketplace.
+  connectionReferences:
+    # +required Name of the connection.
+    - name: ollama-connection
+      # +required Service identifier of the dependent component (Ollama service).
+      resourceRef: service:/LLMProject/OllamaService/v1/a1234/PUBLIC
+
+# +optional Defines runtime configurations
+configuration:
+  # +optional List of environment variables to be injected into the component.
+  env:
+    # Set the Ollama model directory
+    - name: OLLAMA_MODELS
+      value: "/opt/ollama"
+    # Enable debug logs
+    - name: OLLAMA_DEBUG
+      value: "true"
+    - name: OLLAMA_LOG_LEVEL
+      value: "debug"
+    # Ollama service URL (retrieved from the connection reference)
+    - name: OLLAMA_SERVICE_URL
+      valueFrom:
+        connectionRef:
+          name: ollama-connection
+          key: ServiceURL
+
