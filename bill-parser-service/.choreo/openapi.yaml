@@ -4,13 +4,6 @@ info:
   description: API that parses bill text to extract structured data like merchant, amount, date and category.
   version: 1.0.0
 
-servers:
-  - url: https://{environment}/bill-parser
-    variables:
-      environment:
-        default: "api.choreo.dev"
-        description: Base API URL
-
 paths:
   /process_bill:
     post:
