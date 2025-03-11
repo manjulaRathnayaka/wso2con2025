@@ -29,7 +29,7 @@ COPY . .
 RUN chown -R ocruser:ocrgroup /app
 
 # Switch to the non-root user
-USER ocruser
+USER 10100
 
 # Expose port 8000
 EXPOSE 8000

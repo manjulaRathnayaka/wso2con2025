@@ -1,0 +1,27 @@
+schemaVersion: 1.1
+
+endpoints:
+  - name: ocr-service-api
+    displayName: OCR Service API
+    service:
+      basePath: /ocr-service
+      port: 8000
+    type: REST
+    networkVisibilities:
+      - Public
+      - Organization
+    schemaFilePath: .choreo/openapi.yaml
+
+configuration:
+  env:
+    - name: TESSDATA_PREFIX
+      value: "/usr/share/tesseract-ocr/5/tessdata"
+    - name: LOG_LEVEL
+      value: "INFO"
+  resources:
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+    requests:
+      memory: "256Mi"
+      cpu: "250m"

@@ -1,0 +1,88 @@
+openapi: 3.0.3
+info:
+  title: OCR Service API
+  description: Service that uses Tesseract OCR to extract text from receipt/bill images
+  version: 1.0.0
+
+servers:
+  - url: https://{environment}/ocr-service
+    variables:
+      environment:
+        default: "api.choreo.dev"
+        description: Base API URL
+
+paths:
+  /ocr:
+    post:
+      summary: Extract text from image
+      description: Performs OCR on an uploaded image to extract text content
+      operationId: extractTextFromImage
+      tags:
+        - OCR Processing
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The image file to process
+              required:
+                - file
+      responses:
+        '200':
+          description: Successfully extracted text from image
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  filename:
+                    type: string
+                    description: Name of the uploaded file
+                  text:
+                    type: string
+                    description: Text extracted from the image
+        '400':
+          description: Invalid request or file format
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
+  /health:
+    get:
+      summary: Health check
+      description: Check if the OCR service is healthy and operational
+      operationId: healthCheck
+      tags:
+        - System
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+                  version:
+                    type: string
+                    example: "1.0.0"
