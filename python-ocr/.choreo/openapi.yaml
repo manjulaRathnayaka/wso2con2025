@@ -4,13 +4,6 @@ info:
   description: Service that uses Tesseract OCR to extract text from receipt/bill images
   version: 1.0.0
 
-servers:
-  - url: https://{environment}/ocr-service
-    variables:
-      environment:
-        default: "api.choreo.dev"
-        description: Base API URL
-
 paths:
   /ocr:
     post:
