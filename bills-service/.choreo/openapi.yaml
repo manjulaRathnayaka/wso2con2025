@@ -1,0 +1,197 @@
+openapi: 3.0.3
+info:
+  title: Bills Service API
+  description: Simple API for bill image processing, storage and retrieval
+  version: 1.0.0
+
+paths:
+  /api/bills/process:
+    post:
+      summary: Process bill image
+      description: Uploads a bill image, extracts text using OCR and parses relevant information
+      operationId: processBillImage
+      tags:
+        - Bill Processing
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: The bill image to process
+              required:
+                - image
+      responses:
+        '200':
+          description: Successfully processed bill image
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  raw_text:
+                    type: string
+                    description: Extracted text from the image
+                  merchant_name:
+                    type: string
+                    description: Extracted merchant name
+                  amount:
+                    type: string
+                    description: Extracted amount
+                  date:
+                    type: string
+                    description: Extracted date
+                  category:
+                    type: string
+                    description: Predicted category
+                  confidence:
+                    type: object
+                    properties:
+                      merchant:
+                        type: number
+                        format: float
+                      amount:
+                        type: number
+                        format: float
+                      date:
+                        type: number
+                        format: float
+                      category:
+                        type: number
+                        format: float
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
+
+  /api/bills:
+    post:
+      summary: Store bill information
+      description: Stores bill information in the database
+      operationId: storeBill
+      tags:
+        - Bill Management
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBillRequest'
+      responses:
+        '201':
+          description: Bill stored successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Bill created successfully"
+                  id:
+                    type: integer
+                    description: ID of the created bill
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
+          
+    get:
+      summary: Get all bills
+      description: Retrieves all bills
+      operationId: getBills
+      tags:
+        - Bill Management
+      responses:
+        '200':
+          description: List of bills
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Bill'
+        '500':
+          description: Internal server error
+
+  /api/bills/{id}:
+    get:
+      summary: Get bill by ID
+      description: Retrieves a specific bill by ID
+      operationId: getBillById
+      tags:
+        - Bill Management
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Bill details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bill'
+        '400':
+          description: Invalid ID format
+        '404':
+          description: Bill not found
+        '500':
+          description: Internal server error
+
+components:
+  schemas:
+    Bill:
+      type: object
+      properties:
+        id:
+          type: integer
+        merchant_name:
+          type: string
+        amount:
+          type: number
+          format: float
+        date:
+          type: string
+          format: date
+        category:
+          type: string
+        notes:
+          type: string
+        raw_text:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    CreateBillRequest:
+      type: object
+      required:
+        - merchant_name
+        - amount
+        - date
+        - category
+      properties:
+        merchant_name:
+          type: string
+        amount:
+          type: number
+          format: float
+        date:
+          type: string
+          format: date
+        category:
+          type: string
+        notes:
+          type: string
+        raw_text:
+          type: string
