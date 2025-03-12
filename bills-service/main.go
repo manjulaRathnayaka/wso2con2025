@@ -3,6 +3,7 @@ package main
 import (
 	"bills-service/handlers"
 	"log"
+	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -12,12 +13,15 @@ func main() {
 	// Create router
 	r := gin.Default()
 
-	// Configure CORS
-	corsConfig := cors.DefaultConfig()
-	corsConfig.AllowAllOrigins = true
-	corsConfig.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
-	corsConfig.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
-	r.Use(cors.New(corsConfig))
+	// Configure CORS with a more secure configuration
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"https://*.choreo.dev", "https://*.wso2.com", "http://localhost:*"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 
 	// Create bill handler
 	billHandler := handlers.NewBillHandler()
