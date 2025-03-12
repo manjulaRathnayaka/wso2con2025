@@ -1,10 +1,13 @@
 module bills-service
 
-go 1.20
+go 1.23.0
+
+toolchain go1.23.5
 
 require (
 	github.com/gin-contrib/cors v1.7.0
 	github.com/gin-gonic/gin v1.9.1
+	golang.org/x/oauth2 v0.28.0
 )
 
 require (

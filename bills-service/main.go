@@ -3,9 +3,7 @@ package main
 import (
 	"bills-service/handlers"
 	"log"
-	"time"
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -14,14 +12,11 @@ func main() {
 	r := gin.Default()
 
 	// Configure CORS with a more secure configuration
-	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"https://*.choreo.dev", "https://*.wso2.com", "http://localhost:*", "http://*.svc.cluster.local"},
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
-		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: true,
-		MaxAge:           12 * time.Hour,
-	}))
+	// corsConfig := cors.DefaultConfig()
+	// corsConfig.AllowOrigins = []string{"https://*.choreo.dev", "https://*.wso2.com", "http://localhost:*"}
+	// corsConfig.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
+	// corsConfig.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
+	// r.Use(cors.New(corsConfig))
 
 	// Create bill handler
 	billHandler := handlers.NewBillHandler()
@@ -33,6 +28,16 @@ func main() {
 		{
 			// 1. Process bill image (OCR + parsing)
 			bills.POST("/process", billHandler.ProcessBillImage)
+
+			// 1b. Enhanced bill processing endpoint that uses external services
+			bills.POST("/process-v2", func(c *gin.Context) {
+				result, err := handlers.ProcessBillImageV2(c)
+				if err != nil {
+					c.JSON(400, gin.H{"error": err.Error()})
+					return
+				}
+				c.JSON(200, result)
+			})
 
 			// 2. Store bill information
 			bills.POST("", billHandler.StoreBill)
