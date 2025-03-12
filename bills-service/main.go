@@ -15,7 +15,7 @@ func main() {
 
 	// Configure CORS with a more secure configuration
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"https://*.choreo.dev", "https://*.wso2.com", "http://localhost:*"},
+		AllowOrigins:     []string{"https://*.choreo.dev", "https://*.wso2.com", "http://localhost:*", "http://*.svc.cluster.local"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
