@@ -10,6 +10,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"bills-service/models"
@@ -157,8 +158,17 @@ func callOCRService(imageBytes []byte, filename string) (string, error) {
 		return "", fmt.Errorf("OCR service URL not configured")
 	}
 
-	// Create request
-	req, err := http.NewRequest("POST", config.ServiceURL, body)
+	// Build full URL with resource path
+	// The base URL may or may not have a trailing slash, so handle both cases
+	serviceURL := config.ServiceURL
+	if !strings.HasSuffix(serviceURL, "/") {
+		serviceURL = serviceURL + "/ocr"
+	} else {
+		serviceURL = serviceURL + "ocr"
+	}
+
+	// Create request with the full URL including resource path
+	req, err := http.NewRequest("POST", serviceURL, body)
 	if err != nil {
 		return "", fmt.Errorf("failed to create OCR request: %v", err)
 	}
@@ -208,6 +218,15 @@ func parseBillInformation(text string) (map[string]interface{}, error) {
 		return nil, fmt.Errorf("Bill parser service URL not configured")
 	}
 
+	// Build full URL with resource path
+	// The base URL may or may not have a trailing slash, so handle both cases
+	serviceURL := config.ServiceURL
+	if !strings.HasSuffix(serviceURL, "/") {
+		serviceURL = serviceURL + "/process_bill"
+	} else {
+		serviceURL = serviceURL + "process_bill"
+	}
+
 	// Prepare request body
 	reqBody, err := json.Marshal(map[string]string{
 		"text": text,
@@ -216,8 +235,8 @@ func parseBillInformation(text string) (map[string]interface{}, error) {
 		return nil, fmt.Errorf("failed to prepare parser request: %v", err)
 	}
 
-	// Create request
-	req, err := http.NewRequest("POST", config.ServiceURL, bytes.NewBuffer(reqBody))
+	// Create request with the full URL including resource path
+	req, err := http.NewRequest("POST", serviceURL, bytes.NewBuffer(reqBody))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create parser request: %v", err)
 	}

@@ -68,6 +68,47 @@ paths:
         '500':
           description: Internal server error
 
+  /api/bills/process-v2:
+    post:
+      summary: Process bill image (Enhanced)
+      description: Enhanced version that uploads a bill image and processes it using external OCR and parsing services
+      operationId: processBillImageV2
+      tags:
+        - Bill Processing
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: The bill image to process
+              required:
+                - image
+      responses:
+        '200':
+          description: Successfully processed bill image
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BillProcessResult'
+        '400':
+          description: Invalid request or processing failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+                    example: "OCR processing failed: no text could be extracted from the image"
+        '500':
+          description: Internal server error
+
   /api/bills:
     post:
       summary: Store bill information
@@ -99,7 +140,7 @@ paths:
           description: Invalid request
         '500':
           description: Internal server error
-          
+
     get:
       summary: Get all bills
       description: Retrieves all bills
@@ -195,3 +236,45 @@ components:
           type: string
         raw_text:
           type: string
+
+    BillProcessResult:
+      type: object
+      properties:
+        raw_text:
+          type: string
+          description: Full extracted text from the image
+        merchant_name:
+          type: string
+          description: Extracted merchant name
+        amount:
+          type: string
+          description: Extracted bill amount
+        date:
+          type: string
+          description: Extracted bill date
+        category:
+          type: string
+          description: Predicted expense category
+        confidence:
+          type: object
+          description: Confidence scores for each extracted field
+          properties:
+            merchant:
+              type: number
+              format: float
+              description: Confidence in merchant name extraction (0-1)
+            amount:
+              type: number
+              format: float
+              description: Confidence in amount extraction (0-1)
+            date:
+              type: number
+              format: float
+              description: Confidence in date extraction (0-1)
+            category:
+              type: number
+              format: float
+              description: Confidence in category prediction (0-1)
+        image_type:
+          type: string
+          description: Content type of the uploaded image
