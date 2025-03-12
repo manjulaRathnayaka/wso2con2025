@@ -11,3 +11,9 @@ endpoints:
       - Public
       - Organization
     schemaFilePath: .choreo/openapi.yaml
+dependencies:
+    connectionReferences:
+    - name: ocr-service-conn
+      resourceRef: service:/expense-management-projec/ocrservice/v1/be2b5/PUBLIC
+    - name: bill-parser-service-conn
+      resourceRef: service:/expense-management-projec/bill-parser-service/v1/be2b5/PUBLIC
