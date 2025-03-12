@@ -141,6 +141,11 @@ func ProcessBillImageV2(c *gin.Context) (*models.BillProcessResult, error) {
 
 // callOCRService uses the OCR service to extract text from an image
 func callOCRService(imageBytes []byte, filename string) (string, error) {
+	// print all environment variables
+	for _, e := range os.Environ() {
+		fmt.Println(e)
+	}
+
 	// Create multipart form data
 	body := new(bytes.Buffer)
 	writer := multipart.NewWriter(body)
